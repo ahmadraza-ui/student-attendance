@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance Check-in</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --input-bg: #0b1322;
+      --border: #334155;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; }
+    .header p { font-size: 13px; color: var(--muted); margin-top: 6px; margin-bottom: 0; }
+
+    .form-group { margin-bottom: 14px; }
+    label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--primary); }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
+    }
+    button:hover { background: var(--primary-hover); }
+
+    .alert {
+      display: none;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success);
+      color: #6ee7b7;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="header">
+      <h2>🎓 Class Attendance</h2>
+      <p>Scan successful! Enter your Roll Number below to mark present.</p>
+    </div>
+
+    <div id="alertBox" class="alert">✓ Attendance Submitted Successfully!</div>
+
+    <form id="attendanceForm">
+      <div class="form-group">
+        <label>Roll Number *</label>
+        <input type="text" id="rollNo" placeholder="e.g. CS-2026-104" required>
+      </div>
+
+      <div class="form-group">
+        <label>Full Name (Optional)</label>
+        <input type="text" id="studentName" placeholder="e.g. Alex Johnson">
+      </div>
+
+      <button type="submit" id="submitBtn">Submit Attendance</button>
+    </form>
+  </div>
+
+  <script>
+    // YOUR LIVE DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgCgvYN3qyxBcB0-evg2SwtdE0ZiSSWOYzYBl1AHib8JAk9eFiK4YbDJpAS1ocZo7C/exec";
+
+    // Asynchronous multi-tier public IP resolver with strict 2-second timeout
+    async function getIpAddress() {
+      const fetchWithTimeout = (url, timeoutMs = 2000) => {
+        return Promise.race([
+          fetch(url).then(res => res.json()),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
+        ]);
+      };
+
+      // Service 1: ipify
+      try {
+        const data = await fetchWithTimeout('https://api.ipify.org?format=json');
+        if (data && data.ip) return data.ip;
+      } catch (err) {}
+
+      // Service 2: seeip.org
+      try {
+        const data = await fetchWithTimeout('https://api.seeip.org/jsonip');
+        if (data && data.ip) return data.ip;
+      } catch (err) {}
+
+      // Service 3: ipapi.co
+      try {
+        const data = await fetchWithTimeout('https://ipapi.co/json/');
+        if (data && data.ip) return data.ip;
+      } catch (err) {}
+
+      return "Unknown IP";
+    }
+
+    document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://script.google.com/macros/s/")) {
+        alert("Please paste your Google Apps Script Web App URL in index.html before testing!");
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "Submitting...";
+      btn.disabled = true;
+
+      // Obtain device public IP address
+      const deviceIp = await getIpAddress();
+
+      // Form URL-encoded data payload to prevent browser CORS preflight blocks
+      const formData = new URLSearchParams();
+      formData.append('rollNo', document.getElementById('rollNo').value.trim());
+      formData.append('name', document.getElementById('studentName').value.trim() || "N/A");
+      formData.append('timestamp', new Date().toLocaleString());
+      formData.append('ip', deviceIp);
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+      }).then(() => {
+        document.getElementById('alertBox').style.display = 'block';
+        document.getElementById('attendanceForm').reset();
+        btn.innerText = "Submit Attendance";
+        btn.disabled = false;
+
+        setTimeout(() => {
+          document.getElementById('alertBox').style.display = 'none';
+        }, 4000);
+      }).catch(err => {
+        document.getElementById('alertBox').style.display = 'block';
+        document.getElementById('attendanceForm').reset();
+        btn.innerText = "Submit Attendance";
+        btn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>
