@@ -1,0 +1,58 @@
+========================================================================
+COMPLETE STUDENT QR CODE ATTENDANCE SYSTEM - SETUP & DEPLOYMENT GUIDE
+========================================================================
+
+Package Files:
+1. index.html          -> Student mobile check-in web page.
+2. GoogleAppsScript.js -> Google Sheet backend connector script.
+3. DEPLOYMENT_GUIDE.txt -> Detailed step-by-step instructions.
+
+------------------------------------------------------------------------
+STEP 1: SET UP THE GOOGLE SHEET BACKEND (FREE EXCEL DATABASE)
+------------------------------------------------------------------------
+1. Go to https://sheets.google.com and create a new blank spreadsheet.
+2. Name it "Class Attendance Database".
+3. In the top menu bar, click "Extensions" -> "Apps Script".
+4. Delete any existing code in the editor and paste the contents of "GoogleAppsScript.js".
+5. Click the "Save" icon (Floppy Disk) or press Ctrl+S.
+6. Click the blue "Deploy" button in the top-right -> Select "New deployment".
+7. Click the gear icon next to "Select type" and choose "Web app".
+8. Set the fields:
+   - Description: Attendance Backend
+   - Execute as: Me
+   - Who has access: Anyone
+9. Click "Deploy".
+10. Click "Authorize access", choose your Google Account, click "Advanced", and click "Go to Untitled project (unsafe)" -> Click "Allow".
+11. COPY the "Web App URL" provided (It looks like: https://script.google.com/macros/s/AKfycbx.../exec).
+
+------------------------------------------------------------------------
+STEP 2: LINK YOUR BACKEND TO INDEX.HTML
+------------------------------------------------------------------------
+1. Open "index.html" in any text editor (Notepad, VS Code, etc.).
+2. Go to line 95.
+3. Replace "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE" with your copied Web App URL.
+4. Save index.html.
+
+------------------------------------------------------------------------
+STEP 3: DEPLOY THE WEBPAGE (FREE HOSTING ON NETLIFY OR GITHUB PAGES)
+------------------------------------------------------------------------
+OPTION A: Netlify (Easiest - 1 Minute)
+1. Go to https://app.netlify.com/drop (no credit card required).
+2. Drag and drop your folder containing index.html into the box.
+3. Netlify will instantly give you a live URL (e.g., https://my-attendance-app.netlify.app).
+
+OPTION B: GitHub Pages
+1. Upload index.html to a public GitHub repository.
+2. Go to Repository Settings -> Pages -> Source: main branch -> Save.
+3. GitHub gives you a live URL (e.g., https://yourname.github.io/attendance).
+
+------------------------------------------------------------------------
+STEP 4: GENERATE & PRINT THE QR CODE
+------------------------------------------------------------------------
+1. Copy your live website URL from Step 3 (e.g., https://my-attendance-app.netlify.app).
+2. Go to https://www.qrcode-monkey.com or https://qr.io
+3. Paste your live website URL into the text box and download the high-resolution QR Code image.
+4. Project this QR Code on your classroom screen, or print it out on paper.
+
+When students scan the QR Code with their phone camera, the check-in page opens. 
+They enter their Roll Number, and their entry streams directly into your Google Sheet!
