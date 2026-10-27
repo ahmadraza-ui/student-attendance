@@ -116,12 +116,12 @@
   </div>
 
   <script>
-    // PRE-CONFIGURED DEPLOYED APPS SCRIPT WEB APP URL
+    // YOUR LIVE DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgCgvYN3qyxBcB0-evg2SwtdE0ZiSSWOYzYBl1AHib8JAk9eFiK4YbDJpAS1ocZo7C/exec";
 
-    // Fast multi-tier IP fetch with timeout & fallback services
+    // Asynchronous multi-tier public IP resolver with strict 2-second timeout
     async function getIpAddress() {
-      const fetchWithTimeout = (url, timeoutMs = 2500) => {
+      const fetchWithTimeout = (url, timeoutMs = 2000) => {
         return Promise.race([
           fetch(url).then(res => res.json()),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
@@ -134,15 +134,15 @@
         if (data && data.ip) return data.ip;
       } catch (err) {}
 
-      // Service 2: ipapi.co
+      // Service 2: seeip.org
       try {
-        const data = await fetchWithTimeout('https://ipapi.co/json/');
+        const data = await fetchWithTimeout('https://api.seeip.org/jsonip');
         if (data && data.ip) return data.ip;
       } catch (err) {}
 
-      // Service 3: seeip.org
+      // Service 3: ipapi.co
       try {
-        const data = await fetchWithTimeout('https://api.seeip.org/jsonip');
+        const data = await fetchWithTimeout('https://ipapi.co/json/');
         if (data && data.ip) return data.ip;
       } catch (err) {}
 
@@ -161,10 +161,10 @@
       btn.innerText = "Submitting...";
       btn.disabled = true;
 
-      // Obtain IP address
+      // Obtain device public IP address
       const deviceIp = await getIpAddress();
 
-      // Send form encoded data to Apps Script
+      // Form URL-encoded data payload to prevent browser CORS preflight blocks
       const formData = new URLSearchParams();
       formData.append('rollNo', document.getElementById('rollNo').value.trim());
       formData.append('name', document.getElementById('studentName').value.trim() || "N/A");
